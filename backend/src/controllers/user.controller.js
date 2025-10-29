@@ -1,6 +1,6 @@
-import { sql } from "../lib/db.js";
+import pool from "../lib/db.js";
 
-export const addUser = async(req,res)=>{
+export const addUser = async (req, res) => {
     try {
         const {name,email} = req.body;
         console.log("name & email ",name,email);
@@ -12,16 +12,16 @@ export const addUser = async(req,res)=>{
             });
         }
 
-        const newData=await sql`
-            INSERT INTO users (name,email)
-            VALUES (${name},${email})
-            RETURNING *
-        `
+        const result = await pool.query(
+            'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *',
+            [name, email]
+        );
+
         res.status(201).json({
             success: true,
-            message: 'Successfully Updated new Data',
-            newData
-        })
+            message: 'Successfully added new user',
+            newData: result.rows[0]
+        });
     } catch (error) {
         console.log('Error occur during the add new user',error);
         res.status(500).json({
@@ -31,16 +31,13 @@ export const addUser = async(req,res)=>{
     }
 }
 
-export const getAllUser= async(req,res)=>{
+export const getAllUser = async (req, res) => {
     try {
-        const user=await sql`
-            SELECT * FROM users
-            ORDER BY name desc 
-        `
+        const result = await pool.query('SELECT * FROM users ORDER BY name desc');
         res.status(200).json({
             success: true,
-            user
-        })
+            user: result.rows
+        });
     } catch (error) {
         console.log('Error occur during the that new user',error);
         res.status(500).json({
