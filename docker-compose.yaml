@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env.compose
+      - ./backend/.env
     depends_on:
       - db
     # No volumes for backend: use built image contents (includes node_modules)

@@ -1,39 +1,29 @@
+import { neon } from '@neondatabase/serverless';
 import dotenv from 'dotenv'
-import pkg from 'pg'
-const { Pool } = pkg
-
 dotenv.config();
 
-const {
-    PGHOST = 'db',
-    PGPASSWORD,
-    PGUSER = 'postgres',
-    PGDATABASE = 'mydatabase',
-    PGPORT = '5432'
-} = process.env
+const { PGHOST, PGPASSWORD, PGUSER, PGDATABASE } = process.env
+// console.log("pghost: ",PGHOST)
+// console.log('password: ',PGPASSWORD)
+// console.log('user: ',PGUSER);
+// console.log('database: ',PGDATABASE);
 
-const pool = new Pool({
-    host: PGHOST,
-    user: PGUSER,
-    password: PGPASSWORD,
-    database: PGDATABASE,
-    port: parseInt(PGPORT, 10)
-})
+export const sql = neon(
+    `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=require&channel_binding=require`
+)
 
 export const dbConnect = async () => {
     try {
-        await pool.query(`
+        await sql`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255),
                 email VARCHAR(255)
-            );
-        `)
-        console.log('Postgres database connected and users table created')
+            )
+        `;
+        console.log("Neon database connected and users table created");
     } catch (error) {
-        console.error('Postgres database failed to connect to server', error)
+        console.error("Neon database failed to connect to server", error);
     }
-}
-
-export default pool
+};
 
